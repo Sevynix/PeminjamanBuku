@@ -18,6 +18,7 @@ const (
 	CodeNotAcceptable    = "NOT_ACCEPTABLE"
 	CodeTooManyRequests  = "TOO_MANY_REQUESTS"
 	CodeInternal         = "INTERNAL_ERROR"
+	CodeServiceUnavailable = "SERVICE_UNAVAILABLE"
 )
 
 type AppError struct {
@@ -118,4 +119,8 @@ func AsAppError(err error) *AppError {
 	}
 
 	return Internal("terjadi kesalahan pada server", err)
+}
+
+func ServiceUnavailable(message string) *AppError {
+	return newError(fiber.StatusServiceUnavailable, CodeServiceUnavailable, message)
 }
