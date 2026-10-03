@@ -24,9 +24,6 @@ func newValidator() *validator.Validate {
 	mustRegister(v, "username", func(fl validator.FieldLevel) bool {
 		return IsValidUsername(fl.Field().String())
 	})
-	mustRegister(v, "isbn", func(fl validator.FieldLevel) bool {
-		return IsValidISBN(fl.Field().String())
-	})
 	mustRegister(v, "strongpassword", func(fl validator.FieldLevel) bool {
 		return CheckPasswordStrength(fl.Field().String()) == ""
 	})
@@ -85,8 +82,6 @@ func messageFor(fe validator.FieldError) string {
 		return "harus salah satu dari: " + strings.ReplaceAll(fe.Param(), " ", ", ")
 	case "username":
 		return "hanya boleh huruf, angka, titik, dan garis bawah"
-	case "isbn":
-		return "format ISBN tidak valid (harus 13 digit)"
 	case "strongpassword":
 		if value, ok := fe.Value().(string); ok {
 			if msg := CheckPasswordStrength(value); msg != "" {

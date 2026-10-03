@@ -57,22 +57,3 @@ func IsValidUsername(username string) bool {
 	}
 	return true
 }
-
-var isbnCleaner = strings.NewReplacer("-", "", " ", "")
-
-func NormalizeISBN(isbn string) string {
-	return isbnCleaner.Replace(strings.TrimSpace(isbn))
-}
-
-func IsValidISBN(isbn string) bool {
-	normalized := NormalizeISBN(isbn)
-	if len(normalized) != 13 {
-		return false
-	}
-	for _, r := range normalized {
-		if r < '0' || r > '9' {
-			return false
-		}
-	}
-	return true
-}
