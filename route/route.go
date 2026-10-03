@@ -14,6 +14,8 @@ import (
 
 type Dependencies struct {
 	Pool        *pgxpool.Pool
+	JWT         *helper.JWTManager
+	AuthService *service.AuthService
 	BookService *service.BookService
 }
 
@@ -22,7 +24,14 @@ func Register(app *fiber.App, deps Dependencies) {
 
 	api.Get("/health", healthCheck(deps.Pool))
 
-	books := api.Group("/books", middleware.RequireJSON)
+	auth := api.Group("/auth", middleware.RequireJSON)
+	auth.Post("/register", deps.AuthService.Register)
+	auth.Post("/login", middleware.LoginRateLimiter(), deps.AuthService.Login)
+	auth.Post("/refresh", deps.AuthService.Refresh)
+	auth.Post("/logout", deps.AuthService.Logout)
+	auth.Get("/me", middleware.RequireAuth(deps.JWT), deps.AuthService.Me)
+
+	books := api.Group("/books", middleware.RequireAuth(deps.JWT), middleware.RequireJSON)
 	books.Get("/", deps.BookService.List)
 	books.Post("/", deps.BookService.Create)
 	books.Get("/:id", deps.BookService.Get)

@@ -20,7 +20,7 @@ func NewApp(logger *slog.Logger, deps route.Dependencies) *fiber.App {
 		WriteTimeout: 10 * time.Second,
 	})
 
-	middleware.Register(app, logger)
+	middleware.Register(app, logger, GetEnv("ALLOWED_ORIGINS", ""))
 	route.Register(app, deps)
 
 	app.Use(func(c *fiber.Ctx) error {
