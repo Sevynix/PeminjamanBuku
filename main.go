@@ -44,20 +44,33 @@ func main() {
 	bookRepository := repository.NewBookRepository(pool)
 	userRepository := repository.NewUserRepository(pool)
 	tokenRepository := repository.NewTokenRepository(pool)
+	roleRepository := repository.NewRoleRepository(pool)
+
+	rawPermissions, err := roleRepository.LoadPermissions(context.Background())
+	if err != nil {
+		logger.Error("gagal memuat permission", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	permissions := helper.NewPermissionSet(rawPermissions)
+	logger.Info("permission dimuat", slog.Any("roles", permissions.KnownRoles()))
 
 	bookService := service.NewBookService(bookRepository)
+	userService := service.NewUserService(userRepository, permissions)
 	authService := service.NewAuthService(
 		userRepository,
 		tokenRepository,
 		jwtManager,
+		permissions,
 		time.Duration(config.GetEnvInt("JWT_REFRESH_TTL_DAYS", 7))*24*time.Hour,
 	)
 
 	app := config.NewApp(logger, route.Dependencies{
 		Pool:        pool,
 		JWT:         jwtManager,
+		Permissions: permissions,
 		AuthService: authService,
 		BookService: bookService,
+		UserService: userService,
 	})
 
 	port := config.GetEnv("APP_PORT", "3000")
