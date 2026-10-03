@@ -57,4 +57,4 @@ func (r *tokenPostgresRepository) Revoke(ctx context.Context, tokenHash string) 
 		return fmt.Errorf("mencabut refresh token: %w", err)
 	}
 	return nil
-}s
+}
