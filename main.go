@@ -8,13 +8,14 @@ import (
 	"syscall"
 	"time"
 
+	"peminjaman-buku/app/repository"
+	"peminjaman-buku/app/service"
 	"peminjaman-buku/config"
 	"peminjaman-buku/database"
 	"peminjaman-buku/route"
 )
 
 func main() {
-	// 1. Konfigurasi dan logger
 	config.LoadEnv()
 	logger := config.NewLogger()
 
@@ -25,7 +26,13 @@ func main() {
 	}
 	defer pool.Close()
 
-	app := config.NewApp(logger, route.Dependencies{Pool: pool})
+	bookRepository := repository.NewBookRepository(pool)
+	bookService := service.NewBookService(bookRepository)
+
+	app := config.NewApp(logger, route.Dependencies{
+		Pool:        pool,
+		BookService: bookService,
+	})
 
 	port := config.GetEnv("APP_PORT", "3000")
 	go func() {
