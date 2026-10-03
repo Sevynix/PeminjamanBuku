@@ -38,3 +38,17 @@ type TokenPair struct {
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
 }
+
+type AssignRoleRequest struct {
+	Role string `json:"role" validate:"required"`
+}
+
+type PatchUserRequest struct {
+	Username *string `json:"username,omitempty" validate:"omitnil,min=3,max=30,username"`
+	Email    *string `json:"email,omitempty" validate:"omitnil,email,max=255"`
+}
+
+type UserListQuery struct {
+	ListQuery
+	Role string
+}
