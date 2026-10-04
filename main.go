@@ -45,6 +45,7 @@ func main() {
 	userRepository := repository.NewUserRepository(pool)
 	tokenRepository := repository.NewTokenRepository(pool)
 	roleRepository := repository.NewRoleRepository(pool)
+	loanRepository := repository.NewLoanRepository(pool)
 
 	rawPermissions, err := roleRepository.LoadPermissions(context.Background())
 	if err != nil {
@@ -56,6 +57,7 @@ func main() {
 
 	bookService := service.NewBookService(bookRepository)
 	userService := service.NewUserService(userRepository, permissions)
+	loanService := service.NewLoanService(loanRepository, permissions)
 	authService := service.NewAuthService(
 		userRepository,
 		tokenRepository,
@@ -71,6 +73,7 @@ func main() {
 		AuthService: authService,
 		BookService: bookService,
 		UserService: userService,
+		LoanService: loanService,
 	})
 
 	port := config.GetEnv("APP_PORT", "3000")
