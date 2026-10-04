@@ -19,6 +19,7 @@ type Dependencies struct {
 	AuthService *service.AuthService
 	BookService *service.BookService
 	UserService *service.UserService
+	LoanService *service.LoanService
 }
 
 func Register(app *fiber.App, deps Dependencies) {
@@ -29,6 +30,7 @@ func Register(app *fiber.App, deps Dependencies) {
 	registerAuth(api, deps)
 	registerBooks(api, deps)
 	registerUsers(api, deps)
+	registerLoans(api, deps)
 }
 
 func registerAuth(api fiber.Router, deps Dependencies) {
@@ -83,4 +85,25 @@ func healthCheck(pool *pgxpool.Pool) fiber.Handler {
 		}
 		return helper.Success(c, fiber.StatusOK, "server dan database berjalan", nil)
 	}
+}
+
+func registerLoans(api fiber.Router, deps Dependencies) {
+	loans := api.Group("/loans", middleware.RequireAuth(deps.JWT), middleware.RequireJSON)
+
+	loans.Post("/", deps.LoanService.Borrow)
+	loans.Get("/me", deps.LoanService.ListMine)
+
+	registerLoanPermissionGuarded(loans, deps)
+	registerLoanOwnershipChecked(loans, deps)
+}
+
+func registerLoanPermissionGuarded(loans fiber.Router, deps Dependencies) {
+	perms := deps.Permissions
+
+	loans.Get("/", middleware.RequirePermission(perms, "loan:list"), deps.LoanService.List)
+	loans.Patch("/:id/return", middleware.RequirePermission(perms, "loan:return"), deps.LoanService.Return)
+}
+
+func registerLoanOwnershipChecked(loans fiber.Router, deps Dependencies) {
+	loans.Get("/:id", deps.LoanService.Get)
 }
