@@ -28,7 +28,7 @@ func translatePgError(err error, action string) error {
 		switch pgErr.Code {
 		case "23505":
 			return ErrDuplicate
-		case "23503":
+		case "23503", "23001":
 			return ErrConflict
 		case "23514":
 			return ErrCheckViolation
